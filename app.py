@@ -3,12 +3,13 @@ import time
 import cv2
 import numpy as np
 from collections import deque
-import yolo_1
-
 from flask import Flask, Response
+
+import yolo_1
 
 app = Flask(__name__)
 disp_frame = None
+
 
 @app.route('/')
 def server_stream():
@@ -27,9 +28,6 @@ def getFrames():
         else:
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n\r\n\r\n')
-
-
-
 
 
 # 영상 입력
@@ -53,7 +51,6 @@ class ThreadA(threading.Thread):
             if ret:
                 if len(self.threadB.input_deque) < 30:
                     self.threadB.input_deque.append([frame, self.name])
-
 
 
 # 영상 사람 detection
@@ -85,11 +82,8 @@ class ThreadB(threading.Thread):
                     self.output_deque.append(frame)
 
 
-
 #  영상 출력
 class ThreadC(threading.Thread):
-
-
     def __init__(self, thread=None):
         threading.Thread.__init__(self)
         self.threadB = thread
@@ -117,16 +111,9 @@ class ThreadC(threading.Thread):
                 start_t = time.time()
 
 
-
-
-
-
-
-
 if __name__ == '__main__':
-    cctv = 'rtsp://admin:4ind331%23@192.168.0.242/profile2/media.smp'
+    cctv = 'rtsp'
     thread_list = []
-
     thread_list.append(ThreadB())
     thread_list.append(ThreadC(thread=thread_list[0]))
     thread_list.append(ThreadA(url=cctv, name='cctv', thread=thread_list[0]))
