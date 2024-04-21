@@ -49,8 +49,6 @@ class ThreadA(threading.Thread):
             ret, frame = self.cap.read()
             if ret:
                 self.frame = frame
-    
-
 
 
 # 영상 detection
@@ -78,7 +76,6 @@ class ThreadC(threading.Thread):
                     frame = th_read.frame.copy()
                     # frame = cv2.resize(frame, dsize=(640,480), interpolation=cv2.INTER_AREA)
                     cv2.imshow(str(th_read.name), frame)
-
                     disp_frame[th_read.name] = frame
                     
                     if th_read.name in fps:
@@ -93,16 +90,12 @@ class ThreadC(threading.Thread):
                     start_time = time.time()
 
             if cv2.waitKey(1) & 0xff==ord('q'):
-                break
-                
+                break          
         cv2.destroyAllWindows()
 
 
-            
-
-
 if __name__=="__main__":
-    cctv = 'rtsp://admin:4ind331%23@192.168.0.242/profile2/media.smp'
+    cctv = 'rtsp'
 
     thread_list = []
     thread_list.append(ThreadA(url=0, name='webcam'))
