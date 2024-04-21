@@ -23,13 +23,10 @@ class ClientSocket(threading.Thread):
             self.cap.set(3, 640)
             self.cap.set(4, 480)
 
-
     def run(self):
         self.sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         self.sock.connect((self.server, self.port))
-        # 영상 송신
         self.send()
-
 
     def send(self):
         encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]  # 이미지의 품질 설정
@@ -38,16 +35,12 @@ class ClientSocket(threading.Thread):
         count = 0
 
         while self.cap.isOpened():
-
             ret, frame = self.cap.read()
             if ret:
                 frame = cv2.resize(frame, dsize=(640, 480), interpolation=cv2.INTER_AREA)
-
                 # 프레임을 string 형태로 인코딩
                 res, encode_frame = cv2.imencode('.jpg', frame, encode_param)
-
                 string_data = np.array(encode_frame).tostring()
-
                 # string 데이터 socket을 통해 전송
                 # self.sock.sendall(str(len(string_data)).encode().ljust(16))
                 # self.sock.sendall(string_data)
@@ -55,7 +48,7 @@ class ClientSocket(threading.Thread):
 
                 cv2.putText(frame, str(self.fps), (15, 25), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 0, 0), 2)
                 cv2.imshow(str(self.url), frame)
-
+                
                 count += 1
 
             if cv2.waitKey(1) & 0xff == ord('q'):
@@ -70,12 +63,7 @@ class ClientSocket(threading.Thread):
         cv2.destroyAllWindows()
 
 
-
-
-
-
 def main():
-
     if len(sys.argv)==2:
         URL = sys.argv[1]
         if URL.isdigit():
@@ -87,13 +75,8 @@ def main():
     PORT = 5050
     HEADER = 64
     FORMAT = 'utf-8'
-
-    print(URL)
-
     client = ClientSocket(SERVER, PORT, URL, HEADER, FORMAT)
     client.start()
-
-
 
 
 if __name__ == "__main__":
