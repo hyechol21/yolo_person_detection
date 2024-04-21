@@ -3,9 +3,10 @@ from collections import deque
 import cv2
 import time
 import numpy as np
+from flask import Flask, Response, render_template
+
 import yolo
 
-from flask import Flask, Response, render_template
 
 app = Flask(__name__)
 disp_frame = dict()
@@ -14,7 +15,6 @@ disp_frame = dict()
 def index():
     return render_template('index.html')
 
-
 @app.route('/cctv')
 def cctv():
     return Response(getFrames('cctv'), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -22,7 +22,6 @@ def cctv():
 @app.route('/webcam')
 def webcam():
     return Response(getFrames('webcam'), mimetype='multipart/x-mixed-replace; boundary=frame')
-
 
 def getFrames(name):
     global disp_frame
@@ -44,7 +43,6 @@ class ThreadA(threading.Thread):
         threading.Thread.__init__(self)
         self.name = name
         self.cap = None
-
         self.frame = None
         self.frame_cnt = 0
         self.results = []
@@ -85,7 +83,6 @@ class ThreadB(threading.Thread):
                 th_read.results = results
 
             time.sleep(0.0001)
-
 
 
 # 영상 출력
@@ -134,17 +131,14 @@ class ThreadC(threading.Thread):
                             cv2.circle(frame, pts[th_read.name][i], 3, (0, 0, 0), -1)
                             cv2.line(frame, pts[th_read.name][i], pts[th_read.name][i + 1], (0, 0, 0), 2)
 
-
                     cv2.putText(frame, str(fps), (15, 25), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 0, 0), 2)
                     cv2.imshow(str(th_read.name), frame)
                     cv2.setMouseCallback(str(th_read.name), draw_roi, th_read)
-
 
                     if roi_start[th_read.name]:
                         disp_frame[th_read.name] = cv2.bitwise_and(frame, mask[th_read.name])
                     else:
                         disp_frame[th_read.name] = frame
-
 
                     count += 1
 
@@ -158,9 +152,7 @@ class ThreadC(threading.Thread):
                 break
 
             time.sleep(1/30)
-
         cv2.destroyAllWindows()
-
 
 
 def draw_roi(event, x, y, flags, param):
@@ -189,15 +181,12 @@ def draw_roi(event, x, y, flags, param):
             pts[param.name].clear()
 
 
-
-
-
 if __name__ == "__main__":
     pts = dict()
     mask = dict()
     roi_start = dict()
 
-    cctv = 'rtsp://admin:4ind331%23@192.168.0.242/profile2/media.smp'
+    cctv = 'rtsp'
 
     th_detector = ThreadB()
     th_detector.start()
