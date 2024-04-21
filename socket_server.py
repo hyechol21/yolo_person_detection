@@ -7,8 +7,6 @@ from collections import deque
 import yolo
 
 
-
-
 class TCPServer(threading.Thread):
     def __init__(self, ip, port):
         threading.Thread.__init__(self)
@@ -27,7 +25,7 @@ class TCPServer(threading.Thread):
             print(f"[NEW CONNECTION] {addr} connected.")
             self.thread_list.append(ThreadReceive(conn, addr))
             self.thread_list[-1].start()
-
+            
         self.sock.close()
 
 
@@ -38,12 +36,10 @@ class ThreadReceive(threading.Thread):
         self.conn = conn
         self.addr = addr
         self.connected = True
-
         self.frame = None
         self.frame_cnt = 0
         self.results = []
         self.roi = None
-
         print(self.addr, ' 영상 수신 대기')
 
     def run(self):
@@ -58,16 +54,12 @@ class ThreadReceive(threading.Thread):
 
                 if (self.frame_cnt % 3 == 0) and (len(th_detector.deque) < 50):
                     th_detector.deque.append([self, self.frame])
-
             except:
                 self.connected = False
 
         cv2.destroyAllWindows()
-
         server.thread_list.remove(self)
         print('삭제')
-
-
 
     # 수신 버퍼를 읽어서 반환
     def recvall(self, count):
@@ -78,7 +70,6 @@ class ThreadReceive(threading.Thread):
             buf += newbuf
             count -= len(newbuf)
         return buf
-
 
 
 # 영상 검출
@@ -95,7 +86,6 @@ class ThreadDetect(threading.Thread):
                 th_read.results = results
 
             time.sleep(0.0001)
-
 
 
 # 영상 송출
@@ -118,7 +108,6 @@ class ThreadSend(threading.Thread):
                     frame = th_read.frame.copy()
                     name = th_read.addr
 
-                    # 사람 박스 그리기
                     for detection in th_read.results:
                         label = detection[0]
                         confidence = detection[1]
@@ -130,7 +119,6 @@ class ThreadSend(threading.Thread):
 
                         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 3)
                         cv2.putText(frame, pstring, (xmin, ymin - 12), cv2.FONT_HERSHEY_DUPLEX, 0.6, (0, 255, 0), 1)
-
 
                     # ROI 영역
                     if name in pts:
@@ -146,11 +134,9 @@ class ThreadSend(threading.Thread):
                             cv2.circle(frame, pts[name][i], 3, (0, 0, 0), -1)
                             cv2.line(frame, pts[name][i], pts[name][i + 1], (0, 0, 0), 2)
 
-
                     cv2.putText(frame, str(fps), (15, 25), cv2.FONT_HERSHEY_DUPLEX, 0.7, (255, 0, 0), 2)
                     cv2.imshow(str(name), frame)
                     cv2.setMouseCallback(str(name), draw_roi, th_read)
-
 
                     if roi_start[name]:
                         th_read.roi = cv2.bitwise_and(frame, mask[name])
@@ -173,9 +159,7 @@ class ThreadSend(threading.Thread):
                     start_time = time.time()
 
             time.sleep(1/30)
-
         cv2.destroyAllWindows()
-
 
 
 # 관심 영역 마우스 콜백 함수
@@ -201,12 +185,6 @@ def draw_roi(event, x, y, flags, param):
         else:
             roi_start[param.addr] = False
             pts[param.addr].clear()
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
